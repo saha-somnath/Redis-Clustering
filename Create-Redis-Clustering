@@ -1,24 +1,28 @@
 
-Redis:
+#Redis:
 Redis is an in-memory distributed key-value database. It also can be used as Message Queue with (PUB/SUB) patterns. With the cluster setup, redis provide high availability, persistence, simple and faster access of data. Here is the instruction of creating redis cluster from scratch.   
 Redis Version: 5.0.3
-Installation: https://redis.io/download
+##Installation: https://redis.io/download
+```
 $ wget http://download.redis.io/releases/redis-5.0.3.tar.gz
 $ tar xzf redis-5.0.3.tar.gz
 $ cd redis-5.0.3
 $ make
-General Configuration: Redis use “/etc/redis.conf” file as default configuration file. 
+```
+##General Configuration: Redis use “/etc/redis.conf” file as default configuration file. 
 -	Start redis instance with default configuration file.
 $ redis-server &
 -	Start redis with a configuration file.
 $redis-server /home/Redis/redis_cluster/7000/redis.conf &
 -	It also can be launched as systemctl process.
-Redis Cluster Setup:
--	By default redis requires six instance to start a cluster. Create six redis instance in six different (preferred) or same machine. I have cluster running in four following servers.
- server1 ( server1) : 10.x.x.1   : ( CentOS -GOOD )
- server2 (server2)  : 10.x.x.2  : ( CentOS - GOOD )
- server3(server3) : 10.x.x.3   : ( Ubuntu - GOOD )
- server4 (server3): 10.x.x.4 : ( Ubuntu - GOOD )
+
+###Redis Cluster Setup:
+By default redis requires six instance to start a cluster. Create six redis instance in six different (preferred) or same machine. I have cluster running in four following servers.
+ ```
+ server1: 10.x.x.1   
+ server2: 10.x.x.2
+ server3: 10.x.x.3  
+ server4: 10.x.x.4 
 	
 root      xxxx1      1  0 Dec1 ?        00:01:08 redis-server 10.x.x.1:7000 [cluster]
 root      xxxx2      1  0 Dec1 ?        00:02:41 redis-server 10.x.x.4:7003 [cluster]
@@ -34,6 +38,7 @@ root      xxxx6      1  0 Dec1 ?        00:06:23 redis-server 10.x.x.3:7002 [clu
  redis-server 10.x.x.3:7004 [cluster]   - S2 -> M2
  redis-server 10.x.x.2:7001 [cluster]  - M2 <- S2
  redis-server 10.x.x.1:7000 [cluster]   - M1 <- S1
+ ```
 
 -	Persistent mode is set. ( appendonly  yes )
 -	Redis Availability:  The redis cluster is designed the survive failure with few nodes. In case of failure of master, the cluster re-configure the system and promote the corresponding slave to become master. 
