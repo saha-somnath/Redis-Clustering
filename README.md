@@ -1,5 +1,5 @@
 # Redis-Clustering
-Redis is an in-memory distributed key-value database. It also can be used as Message Queue with (PUB/SUB) patterns. With the cluster setup, redis provide high availability, persistence, simple and faster access of data. Here is the instruction of creating redis cluster from scratch.   
+Redis is an in-memory distributed key-value database. It also can be used as Message Queue with (PUB/SUB) patterns. With the cluster setup, redis provide high availability, persistence, simple and faster access of data. Here is the instruction of creating redis cluster from scratch. It also provides instruction of implementation of "PUB/SUB" mechanism and has example of Python/C++ based client creation.    
 #### Redis Version: 5.0.3
 ### Installation: https://redis.io/download
 ```
@@ -48,12 +48,12 @@ root      xxxx6      1  0 Dec1 ?        00:06:23 redis-server 10.x.x.3:7002 [clu
 
 - Enable persistant mode by seting "appendonly" to "yes". ( appendonly  yes )
 - Redis Availability:  The redis cluster is designed to survive the failure with few nodes. In case of failure of master, the cluster re-configure the system and promote the corresponding slave to become master. 
-- How cluster works:
--- Automatic detection of non-working cluster node (master) and promote slave to master.
--- All the nodes are connected using TCP bus and a binary protocol called a Redis Cluster Bus.
--- Nodes use a gossip protocol to propagate information about the cluster in order to discover new nodes, to send ping packets to make sure all the other nodes are working properly, and to send cluster messages needed to signal specific conditions
--- Cluster bus is used to propagate PUB/SUB messages.
--- Improved availability with replication migration feature. In case of master no longer replicated by a slave will receive a slave from master have multiple slaves.
+#### How cluster works:
+- Automatic detection of non-working cluster node (master) and promote slave to master.
+- All the nodes are connected using TCP bus and a binary protocol called a Redis Cluster Bus.
+- Nodes use a gossip protocol to propagate information about the cluster in order to discover new nodes, to send ping packets to make sure all the other nodes are working properly, and to send cluster messages needed to signal specific conditions
+- Cluster bus is used to propagate PUB/SUB messages.
+- Improved availability with replication migration feature. In case of master no longer replicated by a slave will receive a slave from master have multiple slaves.
 ### Create Redis Cluster:
 ```
 o Command:
@@ -95,7 +95,7 @@ S: 12f763693beffb36c1122f8cd7b5ea0ebed8612a 10.x.x.4:7005
 ```
 ### Testing Cluster: 
 - Example of covering a master
--- Manual shutdown of 10.x.x.2:7001  redis master node. Slave 10.x.x.3:7004 becomes master.
+- Manual shutdown of 10.x.x.2:7001  redis master node. Slave 10.x.x.3:7004 becomes master.
 ```
 redis-cli --cluster check 10.x.x.4:7003
 Could not connect to Redis at 10.x.x.2:7001: Connection refused
@@ -167,9 +167,11 @@ o Installation:
  $pip install redis-py-cluster
 ``` 
 o Sample Code to publish and subscribe to a channel.
+```
 /root/Redis-Clustering/Python/Redis_Cluster.py
 /root/Redis-Clustering/Redis_Cluster_Publish.py
 /root/Redis-Clustering/Redis_Cluster_Subscribe.py
+```
 o Execution:
 ```
  $python Redis_Cluster_Subscribe.py <Channel>
@@ -233,8 +235,7 @@ INFO: Channel-CH , Message-"{"name": "CM_NODE_UP","node": "NODE-1","args": {"nod
 ```
 
 ### How to add a new node:
-- Launch a new redis instance and join that to the existing cluster.
-- Cluster with 6 nodes:
+- Launch a new redis instance and join that to the existing cluster. Cluster with 6 nodes:
 ```
 root@server3:/home/Redis# redis-cli --cluster check 10.x.x.4:7003
 10.x.x.1:7000 (4867b620...) -> 1 keys | 5461 slots | 1 slaves.
