@@ -46,13 +46,14 @@ root      xxxx6      1  0 Dec1 ?        00:06:23 redis-server 10.x.x.3:7002 [clu
  redis-server 10.x.x.1:7000 [cluster]   - M1 <- S1
  ```
 
-- Persistent mode is set. ( appendonly  yes )
-- Redis Availability:  The redis cluster is designed the survive failure with few nodes. In case of failure of master, the cluster re-configure the system and promote the corresponding slave to become master. 
-o Automatic detection of non-working cluster node (master) and promote slave to master.
-o All the nodes are connected using TCP bus and a binary protocol called a Redis Cluster Bus.
-o Nodes use a gossip protocol to propagate information about the cluster in order to discover new nodes, to send ping packets to make sure all the other nodes are working properly, and to send cluster messages needed to signal specific conditions
-o Cluster bus is used to propagate PUB/SUB messages.
-o Improved availability with replication migration feature. In case of master no longer replicated by a slave will receive a slave from master have multiple slaves.
+- Enable persistant mode by seting "appendonly" to "yes". ( appendonly  yes )
+- Redis Availability:  The redis cluster is designed to survive the failure with few nodes. In case of failure of master, the cluster re-configure the system and promote the corresponding slave to become master. 
+- How cluster works:
+-- Automatic detection of non-working cluster node (master) and promote slave to master.
+-- All the nodes are connected using TCP bus and a binary protocol called a Redis Cluster Bus.
+-- Nodes use a gossip protocol to propagate information about the cluster in order to discover new nodes, to send ping packets to make sure all the other nodes are working properly, and to send cluster messages needed to signal specific conditions
+-- Cluster bus is used to propagate PUB/SUB messages.
+-- Improved availability with replication migration feature. In case of master no longer replicated by a slave will receive a slave from master have multiple slaves.
 ### Create Redis Cluster:
 ```
 o Command:
@@ -94,7 +95,7 @@ S: 12f763693beffb36c1122f8cd7b5ea0ebed8612a 10.x.x.4:7005
 ```
 ### Testing Cluster: 
 - Example of covering a master
-o Manual shutdown of 10.x.x.2:7001  redis master node. Slave 10.x.x.3:7004 becomes master.
+-- Manual shutdown of 10.x.x.2:7001  redis master node. Slave 10.x.x.3:7004 becomes master.
 ```
 redis-cli --cluster check 10.x.x.4:7003
 Could not connect to Redis at 10.x.x.2:7001: Connection refused
@@ -170,12 +171,13 @@ o Sample Code to publish and subscribe to a channel.
 /root/Redis-Clustering/Redis_Cluster_Publish.py
 /root/Redis-Clustering/Redis_Cluster_Subscribe.py
 o Execution:
+```
  $python Redis_Cluster_Subscribe.py <Channel>
  $python Redis_Cluster_Publish.py <Channel> <Message>
+``` 
 
 #### C++ Client:
 o Installation: https://github.com/Cylix/cpp_redis/wiki/Mac-&-Linux-Install
- Steps:
 ```
 - Clone the project
 $git clone https://github.com/Cylix/cpp_redis.git
