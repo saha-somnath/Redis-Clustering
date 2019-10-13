@@ -37,7 +37,7 @@ def get_message(queue=None):
             ## take action
             if msg:
                 data = msg['data']
-                if isinstance(data, str) or isinstance(data, unicode):
+                if isinstance(data, str):
                     try:
                         data = json.loads(data)
                     except Exception as e:

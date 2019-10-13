@@ -9,7 +9,7 @@ class RedisCluster:
     Class: Redis Cluster
     Connect to the redis cluster.
     """
-    CONFIG = "Redis_Cluster_Config.json"
+    CONFIG = "cluster_config.json"
 
     def __init__(self):
         self.config        = self.getClusterConfig()
