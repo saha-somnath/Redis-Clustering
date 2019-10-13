@@ -1,21 +1,26 @@
 # Redis-Clustering
 Redis is an in-memory distributed key-value database. It also can be used as Message Queue with (PUB/SUB) patterns. With the cluster setup, redis provide high availability, persistence, simple and faster access of data. Here is the instruction of creating redis cluster from scratch.   
-Redis Version: 5.0.3
-## Installation: https://redis.io/download
+#### Redis Version: 5.0.3
+### Installation: https://redis.io/download
 ```
 $ wget http://download.redis.io/releases/redis-5.0.3.tar.gz
 $ tar xzf redis-5.0.3.tar.gz
 $ cd redis-5.0.3
 $ make
+$ make install
+
+or follow instruction from redis installation page.
+https://redis.io/topics/quickstart
 ```
-## General Configuration: Redis use “/etc/redis.conf” file as default configuration file. 
+### General Configuration: Redis use “/etc/redis.conf” file as default configuration file. 
 ```
 - Start redis instance with default configuration file.
 $redis-server &
 - Start redis with a configuration file.
 $redis-server /home/Redis/redis_cluster/7000/redis.conf &
-- It also can be launched as systemctl process.
-$
+- It also can be launched as systemctl process. Service script possible location
+  /etc/systemd/system/redis.service  or /usr/lib/systemd/system/redis.service
+$ service redis start
 ```
 ### Redis Cluster Setup:
 By default redis requires six instance to start a cluster. Create six redis instance in six different (preferred) or same machine. I have cluster running in four following servers.
@@ -120,7 +125,7 @@ S: 12f763693beffb36c1122f8cd7b5ea0ebed8612a 10.x.x.4:7005
 ```
 - Bring back the shutdown node (10.x.x.2:7001) alive which become slave of new master (10.x.x.3:7004)
 ```
-o	redis-cli --cluster check 10.x.x.4:7003
+$ redis-cli --cluster check 10.x.x.4:7003
 10.x.x.1:7000 (4867b620...) -> 0 keys | 5461 slots | 1 slaves.
 10.x.x.3:7004 (de14cae1...) -> 0 keys | 5462 slots | 1 slaves.
 10.x.x.3:7002 (a17fe73f...) -> 0 keys | 5461 slots | 1 slaves.
@@ -150,48 +155,25 @@ S: 12f763693beffb36c1122f8cd7b5ea0ebed8612a 10.x.x.4:7005
 >>> Check slots coverage...
 [OK] All 16384 slots covered.
 ```
-### Example of PUB/SUB in python
-o Subscribe to a channel, say CH, using python script Redis_Cluster_Subscribe.py.
-```
-[root@server1 Redis]# python Redis_Cluster_Subscribe.py
-INFO: Connection established with node [{'host': '10.x.x.1', 'port': 7000}, {'host': '10.x.x.3', 'port': 7002}]
-INFO: Subscribing to the channel CH
-1
-{u'node': u'NODE-1', u'timestamp': u'110000223334', u'args': {u'node': u'NODE-1', u'cluster': u'CLUSTER-1'}, u'name': u'CM_NODE_UP'}
-o	Publish a message to that channel using Redis_Cluster_Publish.py script.
-root@server4:/home/Redis# python Redis_Cluster_Publish.py CH '{"name": "CM_NODE_UP","node": "NODE-1","args": {"node": "NODE-1", "cluster": "CLUSTER-1"},"timestamp": "110000223334"}'
-INFO: Connection established with node [{'host': '10.x.x.1', 'port': 7000}, {'host': '10.x.x.3', 'port': 7002}]
-INFO: Channel-CH , Message-"{"name": "CM_NODE_UP","node": "NODE-1","args": {"node": "NODE-1", "cluster": "CLUSTER-1"},"timestamp": "110000223334"}"
-root@server4:/home/Redis#
-```
-- Example of PUB/SUB using Python and C++ api.
-o Subscribe to a channel, say CH, using C++ api.
-```
-root@server3:/home/Redis# ./cpp_redis_subscriber CH
-INFO: Subscribing to a channel CH
-MESSAGE CH: {"name": "CM_NODE_UP","node": "NODE-1","args": {"node": "NODE-1", "cluster": "CLUSTER-1"},"timestamp": "110000223334"}
-o	Publish a message to the channel.
-[root@server1 Redis]# python Redis_Cluster_Publish.py CH '{"name": "CM_NODE_UP","node": "NODE-1","args": {"node": "NODE-1", "cluster": "CLUSTER-1"},"timestamp": "110000223334"}'
-INFO: Connection established with node [{'host': '10.x.x.1', 'port': 7000}, {'host': '10.x.x.3', 'port': 7002}]
-INFO: Channel-CH , Message-"{"name": "CM_NODE_UP","node": "NODE-1","args": {"node": "NODE-1", "cluster": "CLUSTER-1"},"timestamp": "110000223334"}"
-[root@server1 Redis]#
-```
+
 
 
 ### The redis client for Python and C++:
-- Python Client:
+#### Python Client:
 o Installation:
+```
  $pip install redis
  $pip install redis-py-cluster
+``` 
 o Sample Code to publish and subscribe to a channel.
-/home/Redis/Redis_Cluster.py
-/home/Redis/Redis_Cluster_Publish.py
-/home/Redis/Redis_Cluster_Subscribe.py
-#### Execution:
+/root/Redis-Clustering/Python/Redis_Cluster.py
+/root/Redis-Clustering/Redis_Cluster_Publish.py
+/root/Redis-Clustering/Redis_Cluster_Subscribe.py
+o Execution:
  $python Redis_Cluster_Subscribe.py <Channel>
  $python Redis_Cluster_Publish.py <Channel> <Message>
 
-- C++ Client:
+#### C++ Client:
 o Installation: https://github.com/Cylix/cpp_redis/wiki/Mac-&-Linux-Install
  Steps:
 ```
@@ -221,6 +203,32 @@ $ g++ cpp_redis_subscriber.cpp -o cpp_redis_subscriber -pthread -std=gnu++11 -lc
 $/home/Redis/cpp_redis_subscriber  <Channel>
 ```
 
+#### Example of PUB/SUB in python
+o Subscribe to a channel, say CH, using python script Redis_Cluster_Subscribe.py.
+```
+[root@server1 Redis]# python Redis_Cluster_Subscribe.py
+INFO: Connection established with node [{'host': '10.x.x.1', 'port': 7000}, {'host': '10.x.x.3', 'port': 7002}]
+INFO: Subscribing to the channel CH
+1
+{u'node': u'NODE-1', u'timestamp': u'110000223334', u'args': {u'node': u'NODE-1', u'cluster': u'CLUSTER-1'}, u'name': u'CM_NODE_UP'}
+o	Publish a message to that channel using Redis_Cluster_Publish.py script.
+root@server4:/home/Redis# python Redis_Cluster_Publish.py CH '{"name": "CM_NODE_UP","node": "NODE-1","args": {"node": "NODE-1", "cluster": "CLUSTER-1"},"timestamp": "110000223334"}'
+INFO: Connection established with node [{'host': '10.x.x.1', 'port': 7000}, {'host': '10.x.x.3', 'port': 7002}]
+INFO: Channel-CH , Message-"{"name": "CM_NODE_UP","node": "NODE-1","args": {"node": "NODE-1", "cluster": "CLUSTER-1"},"timestamp": "110000223334"}"
+root@server4:/home/Redis#
+```
+#### Example of PUB/SUB using Python and C++ api.
+o Subscribe to a channel, say CH, using C++ api.
+```
+root@server3:/home/Redis# ./cpp_redis_subscriber CH
+INFO: Subscribing to a channel CH
+MESSAGE CH: {"name": "CM_NODE_UP","node": "NODE-1","args": {"node": "NODE-1", "cluster": "CLUSTER-1"},"timestamp": "110000223334"}
+o	Publish a message to the channel.
+[root@server1 Redis]# python Redis_Cluster_Publish.py CH '{"name": "CM_NODE_UP","node": "NODE-1","args": {"node": "NODE-1", "cluster": "CLUSTER-1"},"timestamp": "110000223334"}'
+INFO: Connection established with node [{'host': '10.x.x.1', 'port': 7000}, {'host': '10.x.x.3', 'port': 7002}]
+INFO: Channel-CH , Message-"{"name": "CM_NODE_UP","node": "NODE-1","args": {"node": "NODE-1", "cluster": "CLUSTER-1"},"timestamp": "110000223334"}"
+[root@server1 Redis]#
+```
 
 ### How to add a new node:
 - Launch a new redis instance and join that to the existing cluster.
@@ -256,7 +264,7 @@ M: a17fe73f8f0ca6fd044ef5ecc79ea7e12b9d25cd 10.x.x.3:7002
 >>> Check slots coverage...
 [OK] All 16384 slots covered.
 ```
-- Add new node 10.x.x.5:7010
+#### Add new node 10.x.x.5:7010
 ```
 root@server3:/home/Redis# redis-cli --cluster add-node 10.x.x.5:7010 10.x.x.3:7002
 >>> Adding node 10.x.x.5:7010 to cluster 10.x.x.3:7002
